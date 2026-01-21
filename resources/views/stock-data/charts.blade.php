@@ -102,6 +102,25 @@
             });
         }
 
+        function barChart(ctx, series) {
+            return new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: series.map(s => ({
+                    ...s,
+                    backgroundColor: s.backgroundColor || s.borderColor,
+                    borderColor: s.borderColor || s.backgroundColor,
+                    borderWidth: 1
+                })) },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: commonOptions.scales.x,
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
         function color(name) {
             const map = {
                 blue: 'rgba(54, 162, 235, 1)',
@@ -136,19 +155,19 @@
             { label: 'Bid Volume', data: datasets.bid_volume, borderColor: color('orange'), backgroundColor: color('orangeT'), tension: 0.2 },
         ]);
 
-        // 4. Volume
-        lineChart(document.getElementById('chartVolume').getContext('2d'), [
-            { label: 'Volume', data: datasets.volume, borderColor: color('blue'), backgroundColor: color('blueT'), tension: 0.2 },
+        // 4. Volume (bar)
+        barChart(document.getElementById('chartVolume').getContext('2d'), [
+            { label: 'Volume', data: datasets.volume, borderColor: color('blue'), backgroundColor: color('blueT') },
         ]);
 
-        // 5. Frekuensi
-        lineChart(document.getElementById('chartFrekuensi').getContext('2d'), [
-            { label: 'Frekuensi', data: datasets.frekuensi, borderColor: color('green'), backgroundColor: color('greenT'), tension: 0.2 },
+        // 5. Frekuensi (bar)
+        barChart(document.getElementById('chartFrekuensi').getContext('2d'), [
+            { label: 'Frekuensi', data: datasets.frekuensi, borderColor: color('green'), backgroundColor: color('greenT') },
         ]);
 
-        // 6. Nilai
-        lineChart(document.getElementById('chartNilai').getContext('2d'), [
-            { label: 'Nilai', data: datasets.nilai, borderColor: color('red'), backgroundColor: color('redT'), tension: 0.2 },
+        // 6. Nilai (bar)
+        barChart(document.getElementById('chartNilai').getContext('2d'), [
+            { label: 'Nilai', data: datasets.nilai, borderColor: color('red'), backgroundColor: color('redT') },
         ]);
     </script>
 </x-app-layout>
