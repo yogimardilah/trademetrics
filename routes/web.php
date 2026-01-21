@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StockDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +28,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Stock Data Routes
+    Route::get('/stock-data', [StockDataController::class, 'index'])->name('stock-data.index');
+    Route::get('/stock-data/upload', [StockDataController::class, 'create'])->name('stock-data.create');
+    Route::post('/stock-data/upload', [StockDataController::class, 'store'])->name('stock-data.store');
+    Route::delete('/stock-data/{id}', [StockDataController::class, 'destroy'])->name('stock-data.destroy');
+    Route::delete('/stock-data', [StockDataController::class, 'deleteAll'])->name('stock-data.delete-all');
 });
+
 
 require __DIR__.'/auth.php';
