@@ -171,7 +171,11 @@
                                     @foreach($stockData as $index => $data)
                                         <tr>
                                             <td>{{ $stockData->firstItem() + $index }}</td>
-                                            <td><strong class="text-primary">{{ $data->kode_saham }}</strong></td>
+                                            <td>
+                                                <a class="text-primary fw-bold text-decoration-none" href="{{ route('stock-data.charts', array_merge(['kode_saham' => $data->kode_saham], request()->only('date_from','date_to'))) }}">
+                                                    {{ $data->kode_saham }}
+                                                </a>
+                                            </td>
                                             <td>{{ $data->nama_perusahaan }}</td>
                                             <td class="text-end">{{ number_format($data->volume, 0, ',', '.') }}</td>
                                             <td class="text-end">{{ number_format($data->nilai, 0, ',', '.') }}</td>

@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/stock-data', [StockDataController::class, 'index'])->name('stock-data.index');
     Route::get('/stock-data/upload', [StockDataController::class, 'create'])->name('stock-data.create');
     Route::post('/stock-data/upload', [StockDataController::class, 'store'])->name('stock-data.store');
+    Route::get('/stock-data/{kode_saham}/charts', [StockDataController::class, 'charts'])->name('stock-data.charts');
     Route::delete('/stock-data/{id}', [StockDataController::class, 'destroy'])->name('stock-data.destroy');
     Route::delete('/stock-data', [StockDataController::class, 'deleteAll'])->name('stock-data.delete-all');
 });

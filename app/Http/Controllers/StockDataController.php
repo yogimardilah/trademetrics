@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StockData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class StockDataController extends Controller
@@ -134,6 +135,103 @@ class StockDataController extends Controller
             return date('Y-m-d', $unix_date);
         }
         
+        if (is_string($value)) {
+            $raw = trim($value);
+            // Handle Indonesian month abbreviations: Jan Feb Mar Apr Mei Jun Jul Agt Sep Okt Nov Des
+            $months = [
+                'jan' => '01', 'feb' => '02', 'mar' => '03', 'apr' => '04', 'mei' => '05',
+                'jun' => '06', 'jul' => '07', 'agt' => '08', 'agu' => '08', 'ags' => '08',
+                'sep' => '09', 'okt' => '10', 'nov' => '11', 'des' => '12',
+            ];
+
+            // Try generic token split: e.g. "30 Des 2025", "30-Des-2025", "30/Des/2025"
+            $tokens = preg_split('/[\s\-\/]+/u', $raw);
+            if (count($tokens) === 3) {
+                [$d, $m, $y] = $tokens;
+                if (ctype_digit($d) && ctype_digit($y)) {
+                    $mNum = null;
+                    $mLower = strtolower($m);
+                    if (isset($months[$mLower])) {
+                        $mNum = $months[$mLower];
+                    } elseif (ctype_digit($m) && (int)$m >= 1 && (int)$m <= 12) {
+                        $mNum = str_pad($m, 2, '0', STR_PAD_LEFT);
+                    }
+                    if ($mNum) {
+                        $day = str_pad($d, 2, '0', STR_PAD_LEFT);
+                        $year = strlen($y) === 2 ? (int)($y) + 2000 : (int)$y;
+                        return sprintf('%04d-%02d-%02d', $year, (int)$mNum, (int)$day);
+                    }
+                }
+            }
+
+            // Fallback to strtotime if possible (handles many English formats)
+            $ts = strtotime($raw);
+            if ($ts !== false) {
+                return date('Y-m-d', $ts);
+            }
+        }
+
+        // Return as-is when no known parsing applies
         return $value;
+    }
+
+    public function charts(Request $request, string $kode_saham)
+    {
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        $query = StockData::query()
+            ->where('kode_saham', $kode_saham);
+
+        if ($dateFrom) {
+            $query->whereDate('tanggal_perdagangan_terakhir', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('tanggal_perdagangan_terakhir', '<=', $dateTo);
+        }
+
+        // Default window if no dates provided: last 30 days
+        if (!$dateFrom && !$dateTo) {
+            $query->whereDate('tanggal_perdagangan_terakhir', '>=', date('Y-m-d', strtotime('-30 days')));
+        }
+
+        $rows = $query
+            ->orderBy('tanggal_perdagangan_terakhir', 'asc')
+            ->get([
+                'tanggal_perdagangan_terakhir',
+                'foreign_sell', 'foreign_buy',
+                'offer', 'offer_volume',
+                'bid', 'bid_volume',
+                'volume', 'frekuensi', 'nilai'
+            ]);
+
+        $labels = $rows->map(function ($r) {
+            $d = $r->tanggal_perdagangan_terakhir;
+            if ($d instanceof \Carbon\Carbon) {
+                return $d->format('Y-m-d');
+            }
+            return (string) $d;
+        });
+
+        $data = [
+            'labels' => $labels->values(),
+            'foreign_sell' => $rows->pluck('foreign_sell')->values(),
+            'foreign_buy' => $rows->pluck('foreign_buy')->values(),
+            'offer' => $rows->pluck('offer')->values(),
+            'offer_volume' => $rows->pluck('offer_volume')->values(),
+            'bid' => $rows->pluck('bid')->values(),
+            'bid_volume' => $rows->pluck('bid_volume')->values(),
+            'volume' => $rows->pluck('volume')->values(),
+            'frekuensi' => $rows->pluck('frekuensi')->values(),
+            'nilai' => $rows->pluck('nilai')->values(),
+        ];
+
+        return view('stock-data.charts', [
+            'kode_saham' => $kode_saham,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'chart' => $data,
+        ]);
     }
 }
