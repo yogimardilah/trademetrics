@@ -24,20 +24,24 @@
                         @csrf
                         
                         <div class="mb-4">
-                            <label for="file" class="form-label fw-bold">
-                                <i class="bi bi-file-earmark-excel me-1"></i> Pilih File Excel (.xlsx, .xls, .csv)
+                            <label for="files" class="form-label fw-bold">
+                                <i class="bi bi-file-earmark-excel me-1"></i> Pilih File Excel (.xlsx, .xls, .csv) — bisa pilih banyak file
                             </label>
                             <input type="file" 
-                                   name="file" 
-                                   id="file" 
+                                   name="files[]" 
+                                   id="files" 
                                    accept=".xlsx,.xls,.csv"
-                                   class="form-control @error('file') is-invalid @enderror"
+                                   multiple
+                                   class="form-control @error('files') is-invalid @enderror @error('files.*') is-invalid @enderror"
                                    required>
-                            @error('file')
+                            @error('files')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            @error('files.*')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>Upload file Excel dengan format yang sesuai. Maksimal ukuran file 10MB.
+                                <i class="bi bi-info-circle me-1"></i>Upload bisa beberapa file sekaligus. Maksimal ukuran tiap file 10MB.
                             </div>
                         </div>
 

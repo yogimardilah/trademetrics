@@ -51,63 +51,72 @@ class StockDataController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+            'files' => 'required',
+            'files.*' => 'mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        try {
-            $file = $request->file('file');
-            $spreadsheet = IOFactory::load($file->getRealPath());
-            $worksheet = $spreadsheet->getActiveSheet();
-            $rows = $worksheet->toArray();
+        $totalImported = 0;
+        $errors = [];
 
-            // Skip header row
-            $header = array_shift($rows);
-            
-            $imported = 0;
-            foreach ($rows as $row) {
-                // Skip empty rows
-                if (empty(array_filter($row))) {
-                    continue;
+        foreach ($request->file('files', []) as $file) {
+            try {
+                $spreadsheet = IOFactory::load($file->getRealPath());
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+
+                // Skip header row
+                $header = array_shift($rows);
+
+                foreach ($rows as $row) {
+                    // Skip empty rows
+                    if (empty(array_filter($row))) {
+                        continue;
+                    }
+
+                    StockData::create([
+                        'kode_saham' => $row[1] ?? null,
+                        'nama_perusahaan' => $row[2] ?? null,
+                        'remarks' => $row[3] ?? null,
+                        'sebelumnya' => $row[4] ?? null,
+                        'open_price' => $row[5] ?? null,
+                        'tanggal_perdagangan_terakhir' => !empty($row[6]) ? $this->parseExcelDate($row[6]) : null,
+                        'first_trade' => $row[7] ?? null,
+                        'tertinggi' => $row[8] ?? null,
+                        'terendah' => $row[9] ?? null,
+                        'penutupan' => $row[10] ?? null,
+                        'selisih' => $row[11] ?? null,
+                        'volume' => $row[12] ?? null,
+                        'nilai' => $row[13] ?? null,
+                        'frekuensi' => $row[14] ?? null,
+                        'index_individual' => $row[15] ?? null,
+                        'offer' => $row[16] ?? null,
+                        'offer_volume' => $row[17] ?? null,
+                        'bid' => $row[18] ?? null,
+                        'bid_volume' => $row[19] ?? null,
+                        'listed_shares' => $row[20] ?? null,
+                        'tradable_shares' => $row[21] ?? null,
+                        'weight_for_index' => $row[22] ?? null,
+                        'foreign_sell' => $row[23] ?? null,
+                        'foreign_buy' => $row[24] ?? null,
+                        'non_regular_volume' => $row[25] ?? null,
+                        'non_regular_value' => $row[26] ?? null,
+                        'non_regular_frequency' => $row[27] ?? null,
+                    ]);
+                    $totalImported++;
                 }
-
-                StockData::create([
-                    'kode_saham' => $row[1] ?? null,
-                    'nama_perusahaan' => $row[2] ?? null,
-                    'remarks' => $row[3] ?? null,
-                    'sebelumnya' => $row[4] ?? null,
-                    'open_price' => $row[5] ?? null,
-                    'tanggal_perdagangan_terakhir' => !empty($row[6]) ? $this->parseExcelDate($row[6]) : null,
-                    'first_trade' => $row[7] ?? null,
-                    'tertinggi' => $row[8] ?? null,
-                    'terendah' => $row[9] ?? null,
-                    'penutupan' => $row[10] ?? null,
-                    'selisih' => $row[11] ?? null,
-                    'volume' => $row[12] ?? null,
-                    'nilai' => $row[13] ?? null,
-                    'frekuensi' => $row[14] ?? null,
-                    'index_individual' => $row[15] ?? null,
-                    'offer' => $row[16] ?? null,
-                    'offer_volume' => $row[17] ?? null,
-                    'bid' => $row[18] ?? null,
-                    'bid_volume' => $row[19] ?? null,
-                    'listed_shares' => $row[20] ?? null,
-                    'tradable_shares' => $row[21] ?? null,
-                    'weight_for_index' => $row[22] ?? null,
-                    'foreign_sell' => $row[23] ?? null,
-                    'foreign_buy' => $row[24] ?? null,
-                    'non_regular_volume' => $row[25] ?? null,
-                    'non_regular_value' => $row[26] ?? null,
-                    'non_regular_frequency' => $row[27] ?? null,
-                ]);
-                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = $file->getClientOriginalName() . ': ' . $e->getMessage();
             }
-
-            return redirect()->route('stock-data.index')
-                ->with('success', "Berhasil mengimport {$imported} data saham.");
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal mengupload file: ' . $e->getMessage());
         }
+
+        if (!empty($errors)) {
+            return redirect()->route('stock-data.index')
+                ->with('success', "Berhasil mengimport {$totalImported} data saham.")
+                ->with('error', 'Sebagian file gagal diproses: ' . implode(' | ', $errors));
+        }
+
+        return redirect()->route('stock-data.index')
+            ->with('success', "Berhasil mengimport {$totalImported} data saham.");
     }
 
     public function destroy($id)
