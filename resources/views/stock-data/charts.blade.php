@@ -39,14 +39,14 @@
                 </div>
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-header bg-light"><strong>Offer & Offer Volume</strong></div>
-                        <div class="card-body"><canvas id="chartOffer"></canvas></div>
+                        <div class="card-header bg-light"><strong>Bid vs Offer</strong></div>
+                        <div class="card-body"><canvas id="chartBidOffer"></canvas></div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card h-100">
-                        <div class="card-header bg-light"><strong>Bid & Bid Volume</strong></div>
-                        <div class="card-body"><canvas id="chartBid"></canvas></div>
+                        <div class="card-header bg-light"><strong>Bid Volume vs Offer Volume</strong></div>
+                        <div class="card-body"><canvas id="chartBidOfferVolume"></canvas></div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -143,16 +143,16 @@
             { label: 'Foreign Buy', data: datasets.foreign_buy, borderColor: color('green'), backgroundColor: color('greenT'), tension: 0.2 },
         ]);
 
-        // 2. Offer & Offer Volume
-        lineChart(document.getElementById('chartOffer').getContext('2d'), [
+        // 2. Bid vs Offer
+        lineChart(document.getElementById('chartBidOffer').getContext('2d'), [
+            { label: 'Bid', data: datasets.bid, borderColor: color('purple'), backgroundColor: color('purpleT'), tension: 0.2 },
             { label: 'Offer', data: datasets.offer, borderColor: color('blue'), backgroundColor: color('blueT'), tension: 0.2 },
-            { label: 'Offer Volume', data: datasets.offer_volume, borderColor: color('orange'), backgroundColor: color('orangeT'), tension: 0.2 },
         ]);
 
-        // 3. Bid & Bid Volume
-        lineChart(document.getElementById('chartBid').getContext('2d'), [
-            { label: 'Bid', data: datasets.bid, borderColor: color('purple'), backgroundColor: color('purpleT'), tension: 0.2 },
+        // 3. Bid Volume vs Offer Volume
+        lineChart(document.getElementById('chartBidOfferVolume').getContext('2d'), [
             { label: 'Bid Volume', data: datasets.bid_volume, borderColor: color('orange'), backgroundColor: color('orangeT'), tension: 0.2 },
+            { label: 'Offer Volume', data: datasets.offer_volume, borderColor: color('green'), backgroundColor: color('greenT'), tension: 0.2 },
         ]);
 
         // 4. Volume (bar)
