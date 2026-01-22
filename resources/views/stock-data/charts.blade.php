@@ -89,7 +89,7 @@
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 10 } } },
+            scales: { x: { type: 'category', offset: true, ticks: { autoSkip: true, maxTicksLimit: 10 } } },
             interaction: { mode: 'index', intersect: false },
             plugins: { legend: { position: 'top' } }
         };
@@ -109,7 +109,9 @@
                     ...s,
                     backgroundColor: s.backgroundColor || s.borderColor,
                     borderColor: s.borderColor || s.backgroundColor,
-                    borderWidth: 1
+                    borderWidth: 1,
+                    categoryPercentage: 0.8,
+                    barPercentage: 0.9
                 })) },
                 options: {
                     ...commonOptions,
