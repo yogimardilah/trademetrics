@@ -131,6 +131,8 @@
                 greenT: 'rgba(75, 192, 192, 0.3)',
                 red: 'rgba(255, 99, 132, 1)',
                 redT: 'rgba(255, 99, 132, 0.3)',
+                yellow: 'rgba(255, 206, 86, 1)',
+                yellowT: 'rgba(255, 206, 86, 0.3)',
                 orange: 'rgba(255, 159, 64, 1)',
                 orangeT: 'rgba(255, 159, 64, 0.3)',
                 purple: 'rgba(153, 102, 255, 1)',
@@ -147,7 +149,7 @@
 
         // 2. Bid vs Offer
         lineChart(document.getElementById('chartBidOffer').getContext('2d'), [
-            { label: 'Bid', data: datasets.bid, borderColor: color('purple'), backgroundColor: color('purpleT'), tension: 0.2 },
+            { label: 'Bid', data: datasets.bid, borderColor: color('yellow'), backgroundColor: color('yellowT'), tension: 0.2 },
             { label: 'Offer', data: datasets.offer, borderColor: color('blue'), backgroundColor: color('blueT'), tension: 0.2 },
         ]);
 
